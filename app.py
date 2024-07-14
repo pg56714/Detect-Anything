@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import cv2
 import gradio as gr
 import numpy as np
@@ -19,23 +19,28 @@ IMAGE_EXAMPLES = [
         0.005,
         0.1,
         True,
+        False,
+    ],
+    [
+        "./images/1224276_original.jpg",
+        "person wearing green clothes",
+        0.2,
+        0.5,
+        True,
+        False,
     ],
 ]
 
 # Load models
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/s")
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/m")
 YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/l")
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/x")
 
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-s")
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-m")
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-l")
-# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-x")
-
-BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator()
+# BOUNDING_BOX_ANNOTATOR = sv.BoundingBoxAnnotator()
+BOUNDING_BOX_ANNOTATOR = sv.BoxAnnotator()  # Corrected based on your latest script
 MASK_ANNOTATOR = sv.MaskAnnotator()
 LABEL_ANNOTATOR = sv.LabelAnnotator()
+
+# 儲存要排除的物件位置
+exclude_positions = []
 
 
 def process_categories(categories: str) -> List[str]:
@@ -46,7 +51,7 @@ def annotate_image(
     input_image: np.ndarray,
     detections: sv.Detections,
     categories: List[str],
-    with_confidence: bool = False,
+    with_confidence: bool = True,
 ) -> np.ndarray:
     labels = [
         (
@@ -65,10 +70,13 @@ def annotate_image(
 def process_image(
     input_image: np.ndarray,
     categories: str,
-    confidence_threshold: float = 0.005,
-    iou_threshold: float = 0.1,
+    confidence_threshold: float,
+    iou_threshold: float,
     with_confidence: bool = True,
+    reverse_filter: bool = True,
 ) -> np.ndarray:
+    global exclude_positions
+
     categories = process_categories(categories)
     YOLO_WORLD_MODEL.set_classes(categories)
     results = YOLO_WORLD_MODEL.infer(
@@ -76,6 +84,23 @@ def process_image(
     )
     detections = sv.Detections.from_inference(results)
     detections = detections.with_nms(threshold=iou_threshold)
+
+    if isinstance(input_image, str):
+        input_image = cv2.imread(input_image)
+
+    results = YOLO_WORLD_MODEL.infer(
+        input_image, confidence=confidence_threshold, nms=iou_threshold
+    )
+    detections = sv.Detections.from_inference(results)
+    detections = detections.with_nms(threshold=iou_threshold)
+
+    if reverse_filter and exclude_positions:
+        detections = filter_detections_by_position(detections, exclude_positions)
+
+    exclude_positions = [(box[0], box[1], box[2], box[3]) for box in detections.xyxy]
+
+    # print(f"detections1: {detections}")
+    # print(f"exclude_positions: {exclude_positions}")
 
     output_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
     output_image = annotate_image(
@@ -86,6 +111,35 @@ def process_image(
     )
 
     return cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
+
+
+# atol 誤差值 先設定 5
+def filter_detections_by_position(
+    detections: sv.Detections,
+    positions: List[Tuple[float, float, float, float]],
+    tol: float = 5,
+) -> sv.Detections:
+    filtered_indices = [
+        i
+        for i, box in enumerate(detections.xyxy)
+        if not any(np.allclose(box, pos, atol=tol) for pos in positions)
+    ]
+
+    # debug
+    # filtered_indices = []
+    # for i, box in enumerate(detections.xyxy):
+    #     print(f"i: {i}")
+    #     print(f"box: {box}")
+    #     keep = True
+    #     for pos in positions:
+    #         print(f"pos: {pos}")
+    #         if np.allclose(box, pos, atol=tol):
+    #             keep = False
+    #             break
+    #     if keep:
+    #         filtered_indices.append(i)
+
+    return detections[filtered_indices]
 
 
 confidence_threshold_component = gr.Slider(
@@ -123,6 +177,13 @@ with_confidence_component = gr.Checkbox(
     info=("Whether to display the confidence of the detected objects."),
 )
 
+reverse_filter_component = gr.Checkbox(
+    value=False,
+    label="Toggle Reverse Filter",
+    info=(
+        "Toggle the reverse filter. When on, it excludes detections overlapping stored target positions."
+    ),
+)
 
 with gr.Blocks() as demo:
     gr.Markdown(MARKDOWN)
@@ -134,11 +195,11 @@ with gr.Blocks() as demo:
                 iou_threshold_component.render()
                 with gr.Row():
                     with_confidence_component.render()
+                    reverse_filter_component.render()
 
             image_categories_text_component = gr.Textbox(
                 label="Categories",
-                placeholder="comma separated list of categories",
-                scale=7,
+                placeholder="you can input multiple words with comma (,)",
             )
         yolo_world_output_image_component = gr.Image(
             type="numpy", label="YOLO-WORLD Output"
@@ -167,11 +228,11 @@ with gr.Blocks() as demo:
             confidence_threshold_component,
             iou_threshold_component,
             with_confidence_component,
+            reverse_filter_component,
         ],
         outputs=[
             yolo_world_output_image_component,
         ],
     )
 
-# demo.launch(debug=False, show_error=True, max_threads=1)
 demo.launch(debug=False, show_error=True)
