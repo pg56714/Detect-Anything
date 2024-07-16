@@ -91,8 +91,6 @@ def process_image(
     results = YOLO_WORLD_MODEL.infer(
         input_image, confidence=confidence_threshold, nms=iou_threshold
     )
-    detections = sv.Detections.from_inference(results)
-    detections = detections.with_nms(threshold=iou_threshold)
 
     if reverse_filter and exclude_positions:
         detections = filter_detections_by_position(detections, exclude_positions)
