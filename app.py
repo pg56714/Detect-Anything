@@ -20,6 +20,7 @@ IMAGE_EXAMPLES = [
         0.1,
         True,
         False,
+        False,
     ],
     [
         "./images/1224276_original.jpg",
@@ -27,6 +28,7 @@ IMAGE_EXAMPLES = [
         0.2,
         0.5,
         True,
+        False,
         False,
     ],
 ]
@@ -73,7 +75,8 @@ def process_image(
     confidence_threshold: float,
     iou_threshold: float,
     with_confidence: bool = True,
-    reverse_filter: bool = True,
+    reverse_filter: bool = False,
+    with_class_agnostic_nms: bool = False,
 ) -> np.ndarray:
     global exclude_positions
 
@@ -83,7 +86,9 @@ def process_image(
         input_image, confidence=confidence_threshold, nms=iou_threshold
     )
     detections = sv.Detections.from_inference(results)
-    detections = detections.with_nms(threshold=iou_threshold)
+    detections = detections.with_nms(
+        class_agnostic=with_class_agnostic_nms, threshold=iou_threshold
+    )
 
     if isinstance(input_image, str):
         input_image = cv2.imread(input_image)
@@ -183,6 +188,12 @@ reverse_filter_component = gr.Checkbox(
     ),
 )
 
+with_class_agnostic_nms_component = gr.Checkbox(
+    value=False,
+    label="Use Class-Agnostic NMS",
+    info=("Suppress overlapping bounding boxes across all classes."),
+)
+
 with gr.Blocks() as demo:
     gr.Markdown(MARKDOWN)
     with gr.Row():
@@ -205,6 +216,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             with_confidence_component.render()
             reverse_filter_component.render()
+            with_class_agnostic_nms_component.render()
 
     gr.Examples(
         fn=process_image,
@@ -215,6 +227,7 @@ with gr.Blocks() as demo:
             confidence_threshold_component,
             iou_threshold_component,
             with_confidence_component,
+            with_class_agnostic_nms_component,
         ],
         outputs=[
             yolo_world_output_image_component,
@@ -230,6 +243,7 @@ with gr.Blocks() as demo:
             iou_threshold_component,
             with_confidence_component,
             reverse_filter_component,
+            with_class_agnostic_nms_component,
         ],
         outputs=[
             yolo_world_output_image_component,
