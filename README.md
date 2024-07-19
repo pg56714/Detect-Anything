@@ -31,8 +31,8 @@ python app.py
 On the challenging LVIS dataset, YOLO-World achieves 35.4 AP with 52.0 FPS on V100,
 which outperforms many state-of-the-art methods in terms of both accuracy and speed.
 
-<img width="1024" src="https://raw.githubusercontent.com/pg56714/YoloWorldTest/main/assets/yoloworld_1.png">
-<img width="1024" src="https://raw.githubusercontent.com/pg56714/YoloWorldTest/main/assets/yoloworld_2.png">
+<img width="1024" src="./assets/yoloworld_1.png">
+<img width="1024" src="./assets/yoloworld_2.png">
 
 ### EfficientViT-SAM
 
@@ -40,14 +40,14 @@ which outperforms many state-of-the-art methods in terms of both accuracy and sp
 Thanks to the lightweight and hardware-efficient core building block,
 it delivers 48.9× measured TensorRT speedup on A100 GPU over SAM-ViT-H without sacrificing performance.
 
-<img width="1024" src="https://raw.githubusercontent.com/pg56714/YoloWorldTest/main/assets/efficientvitsam_1.png">
-<img width="1024" src="https://raw.githubusercontent.com/pg56714/YoloWorldTest/main/assets/efficientvitsam_2.png">
+<img width="1024" src="./assets/efficientvitsam_1.png">
+<img width="1024" src="./assets/efficientvitsam_2.png">
 
 ### LaMa
 
 [LaMa](https://github.com/advimman/lama) is an advanced image inpainting method that significantly improves the restoration of large missing areas, complex geometric structures, and high-resolution images through the use of fast Fourier convolutions and high receptive field perceptual loss.
 
-<img width="1024" src="https://raw.githubusercontent.com/pg56714/YoloWorldTest/main/assets/lama_1.png">
+<img width="1024" src="./assets/lama_1.png">
 
 ## Citation
 
