@@ -36,6 +36,15 @@ IMAGE_EXAMPLES = [
 # Load models
 YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/l")
 
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/s")
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/m")
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/x")
+
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-s")
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-m")
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-l")
+# YOLO_WORLD_MODEL = YOLOWorld(model_id="yolo_world/v2-x")
+
 BOUNDING_BOX_ANNOTATOR = sv.BoxAnnotator()
 LABEL_ANNOTATOR = sv.LabelAnnotator()
 
