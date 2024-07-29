@@ -1,8 +1,39 @@
 gradio==4.19.2
 # inference[yolo-world]==0.15.0
-inference-gpu[yolo-world]==0.15.0
+# inference-gpu[yolo-world]==0.15.0
+inference-gpu[yolo-world]==0.9.13 # This model version is slightly better (but only for yolo_world/l).
 supervision
 timm
 onnx
 onnxsim
+# onnxruntime
+onnxruntime-gpu
 segment_anything
+gradio-sbmp-promptable-image
+
+# lama
+pyyaml
+tqdm
+numpy
+easydict
+scikit-image
+scikit-learn
+opencv-python
+tensorflow
+joblib
+matplotlib
+pandas
+albumentations==0.5.2
+hydra-core
+pytorch-lightning
+tabulate
+kornia==0.5.0
+webdataset
+packaging
+wldhx.yadisk-direct
+
+diffusers
+transformers
+accelerate
+scipy
+safetensors
