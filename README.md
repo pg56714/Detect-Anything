@@ -14,8 +14,21 @@ conda create -n yoloworldtest python=3.10 -y
 
 conda activate yoloworldtest
 
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
 pip install -r requirements.txt
 ```
+
+### Weights
+
+Download the weights from the following links and save them in the `weights` directory.
+
+```
+curl -LJO https://huggingface.co/smartywu/big-lama/resolve/main/big-lama.zip
+unzip big-lama.zip
+```
+
+[EfficientViT-SAM-XL1](https://huggingface.co/han-cai/efficientvit-sam/resolve/main/xl1.pt)
 
 ### Running the Project
 
@@ -74,4 +87,12 @@ it delivers 48.9× measured TensorRT speedup on A100 GPU over SAM-ViT-H without 
   journal={arXiv preprint arXiv:2109.07161},
   year={2021}
 }
+```
+
+## Note
+
+```
+Lama refine
+lama/configs/prediction/default.yaml
+refine: False # refiner will only run if this is True
 ```
