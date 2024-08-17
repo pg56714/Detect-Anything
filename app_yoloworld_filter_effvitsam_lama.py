@@ -336,7 +336,7 @@ with_dilate_kernel = gr.Checkbox(
 image_resolution = gr.Slider(
     label="Image Resolution for Stable Diffusion",
     minimum=256,
-    maximum=768,
+    maximum=1024,
     value=512,
     step=64,
 )
@@ -497,6 +497,7 @@ with gr.Blocks() as demo:
             input_image_component,
             yolo_world_output_image_component,
             image_bg_removal,
+            image_ob_removal,
             mask_image,
             img_rm_with_mask,
         ],
@@ -504,6 +505,7 @@ with gr.Blocks() as demo:
             input_image_component,
             yolo_world_output_image_component,
             image_bg_removal,
+            image_ob_removal,
             mask_image,
             img_rm_with_mask,
         ],

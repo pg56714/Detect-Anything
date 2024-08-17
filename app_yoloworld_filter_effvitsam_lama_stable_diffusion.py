@@ -370,7 +370,7 @@ with_dilate_kernel = gr.Checkbox(
 image_resolution = gr.Slider(
     label="Image Resolution for Stable Diffusion",
     minimum=256,
-    maximum=768,
+    maximum=1024,
     value=512,
     step=64,
 )
