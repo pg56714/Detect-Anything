@@ -9,13 +9,7 @@ from torch.amp import autocast
 
 from efficientvit.models.nn.act import build_act
 from efficientvit.models.nn.norm import build_norm
-from efficientvit.models.utils import (
-    get_same_padding,
-    list_sum,
-    resize,
-    val2list,
-    val2tuple,
-)
+from efficientvit.models.utils import get_same_padding, list_sum, resize, val2list, val2tuple
 
 __all__ = [
     "ConvLayer",
@@ -99,9 +93,7 @@ class UpSampleLayer(nn.Module):
 
     @autocast(device_type="cuda", enabled=False)
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if (
-            self.size is not None and tuple(x.shape[-2:]) == self.size
-        ) or self.factor == 1:
+        if (self.size is not None and tuple(x.shape[-2:]) == self.size) or self.factor == 1:
             return x
         if x.dtype in [torch.float16, torch.bfloat16]:
             x = x.float()
@@ -387,13 +379,7 @@ class LiteMLA(nn.Module):
                         groups=3 * total_dim,
                         bias=use_bias[0],
                     ),
-                    nn.Conv2d(
-                        3 * total_dim,
-                        3 * total_dim,
-                        1,
-                        groups=3 * heads,
-                        bias=use_bias[0],
-                    ),
+                    nn.Conv2d(3 * total_dim, 3 * total_dim, 1, groups=3 * heads, bias=use_bias[0]),
                 )
                 for scale in scales
             ]
@@ -474,9 +460,7 @@ class LiteMLA(nn.Module):
         original_dtype = att_map.dtype
         if original_dtype in [torch.float16, torch.bfloat16]:
             att_map = att_map.float()
-        att_map = att_map / (
-            torch.sum(att_map, dim=2, keepdim=True) + self.eps
-        )  # b h n n
+        att_map = att_map / (torch.sum(att_map, dim=2, keepdim=True) + self.eps)  # b h n n
         att_map = att_map.to(original_dtype)
         out = torch.matmul(v, att_map)  # b h d n
 
@@ -600,9 +584,7 @@ class DAGBlock(nn.Module):
         self.output_ops = nn.ModuleList(list(outputs.values()))
 
     def forward(self, feature_dict: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
-        feat = [
-            op(feature_dict[key]) for key, op in zip(self.input_keys, self.input_ops)
-        ]
+        feat = [op(feature_dict[key]) for key, op in zip(self.input_keys, self.input_ops)]
         if self.merge == "add":
             feat = list_sum(feat)
         elif self.merge == "cat":
