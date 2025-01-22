@@ -35,9 +35,8 @@ dependencies = [
   "wldhx-yadisk-direct>=0.0.6",
   "ruff>=0.9.2",
   "onnxruntime==1.20.0",
-  "torch>=2.4.1",
-  "torchaudio>=2.4.1",
-  "torchvision>=0.19.1",
+  "torch>=2.5.1",
+  "torchvision>=0.20.1",
 ]
 description = "Add your description here"
 name = "detect-anything"
@@ -47,7 +46,6 @@ version = "0.1.0"
 
 [tool.uv.sources]
 torch = {index = "pytorch-cu121"}
-torchaudio = {index = "pytorch-cu121"}
 torchvision = {index = "pytorch-cu121"}
 
 [[tool.uv.index]]
