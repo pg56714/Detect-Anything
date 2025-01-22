@@ -10,13 +10,11 @@ https://huggingface.co/han-cai/efficientvit-sam/resolve/main/xl1.pt
 Use Anaconda to create a new environment and install the required packages.
 
 ```
-conda create -n yoloworldtest python=3.10 -y
+uv venv
 
-conda activate yoloworldtest
+.venv\Scripts\activate
 
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-pip install -r requirements.txt
+uv pip install -r pyproject.toml
 ```
 
 ### Weights

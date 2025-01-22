@@ -26,7 +26,7 @@ def process_images(folder_path, output_folder):
             img_modified = Image.fromarray(img_array)
             img_modified.save(os.path.join(output_folder, filename))
     
-    print(f"Processed Finished")
+    print("Processed Finished")
 
 # Specify the path to your image folder and output folder
 folder_path = "./data_only_full_mask/train/labels"

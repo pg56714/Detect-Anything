@@ -20,8 +20,8 @@ def batch_process_images(json_path, base_folder, image_folder, mask_folder):
                 print(f"File not found: {file_name}")
 
             full_mask_path = os.path.join(base_folder, image["full_mask_path"])
-            object_mask_path = os.path.join(base_folder, image["object_mask_path"])
-            shadow_mask_path = os.path.join(base_folder, image["shadow_mask_path"])
+            # object_mask_path = os.path.join(base_folder, image["object_mask_path"])
+            # shadow_mask_path = os.path.join(base_folder, image["shadow_mask_path"])
 
             # for mask_path in [full_mask_path, object_mask_path, shadow_mask_path]:
             for mask_path in [full_mask_path]:
@@ -33,7 +33,7 @@ def batch_process_images(json_path, base_folder, image_folder, mask_folder):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    print(f"Processed Finished")
+    print("Processed Finished")
 
 
 # # Train

@@ -1,3 +1,4 @@
+import warnings
 import os
 import cv2
 import gradio as gr
@@ -10,6 +11,7 @@ from inference.models import YOLOWorld
 from efficientvit.models.efficientvit.sam import EfficientViTSamPredictor
 from efficientvit.sam_model_zoo import create_sam_model
 
+warnings.filterwarnings("ignore")
 
 MARKDOWN = """
 # YOLO-World + EfficientViT-SAM

@@ -1,9 +1,12 @@
+import warnings
 import cv2
 import gradio as gr
 import numpy as np
 import supervision as sv
 from typing import List, Tuple
 from inference.models import YOLOWorld
+
+warnings.filterwarnings("ignore")
 
 MARKDOWN = """
 # YoloWorldTest

@@ -1,34 +1,24 @@
 import os
+import warnings
+from typing import List, Tuple
+
 import cv2
 import gradio as gr
 import numpy as np
 import supervision as sv
 import torch
-from typing import List, Tuple
-from inference.models import YOLOWorld
 
 from efficientvit.models.efficientvit.sam import EfficientViTSamPredictor
 from efficientvit.sam_model_zoo import create_sam_model
-
-import warnings
-
-warnings.filterwarnings("ignore")
-
+from inference.models import YOLOWorld
 from lama_inpaint import (
-    inpaint_img_with_lama,
     build_lama_model,
     inpaint_img_with_builded_lama,
 )
-
-from utils import (
-    load_img_to_array,
-    save_array_to_img,
-    dilate_mask,
-    show_mask,
-    show_points,
-)
-
 from stable_diffusion_inpaint import fill_img_with_sd, replace_img_with_sd
+from utils import dilate_mask
+
+warnings.filterwarnings("ignore")
 
 MARKDOWN = """
 # YOLO-World + EfficientViT-SAM

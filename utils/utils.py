@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-from typing import Any, Dict, List
+from typing import List
 
 
 def load_img_to_array(img_p):

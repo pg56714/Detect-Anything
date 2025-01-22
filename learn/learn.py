@@ -1,5 +1,5 @@
-import numpy as np
-import cv2
+# import numpy as np
+# import cv2
 
 # image = cv2.imread("path_to_image.jpg")
 # print("Original shape:", image.shape)  # 輸出可能是 (720, 1280, 3)

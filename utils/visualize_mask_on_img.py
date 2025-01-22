@@ -1,11 +1,8 @@
-import cv2
 import sys
 import argparse
 import numpy as np
-from PIL import Image
 from pathlib import Path
 from matplotlib import pyplot as plt
-from typing import Any, Dict, List
 import glob
 
 from utils import load_img_to_array, show_mask
