@@ -31,7 +31,7 @@ unzip big-lama.zip
 ### Running the Project
 
 ```
-python app.py
+uv run app.py
 ```
 
 ## Core Models
