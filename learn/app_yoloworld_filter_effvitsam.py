@@ -14,8 +14,7 @@ from efficientvit.sam_model_zoo import create_sam_model
 warnings.filterwarnings("ignore")
 
 MARKDOWN = """
-# YOLO-World + EfficientViT-SAM
-Powered by Roboflow [Inference](https://github.com/roboflow/inference) and [Supervision](https://github.com/roboflow/supervision) and [YOLO-World](https://github.com/AILab-CVC/YOLO-World) and [EfficientViT-SAM](https://github.com/mit-han-lab/efficientvit)
+# Detect Anything
 """
 IMAGE_EXAMPLES = [
     [
