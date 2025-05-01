@@ -323,15 +323,17 @@ def auto_calculate_tol_by_center_distance(
         return 5.0
 
     def get_centers(positions):
-        return np.array(
+        centers = np.array(
             [[(x1 + x2) / 2, (y1 + y2) / 2] for x1, y1, x2, y2 in positions]
         )
+        # print(f"👉 中心點計算: {centers.tolist()}")
+        return centers
 
     centers_1 = get_centers(positions_1)
     centers_2 = get_centers(positions_2)
-    dist_matrix = cdist(centers_1, centers_2)  # 歐幾里得距離計算
+    dist_matrix = cdist(centers_1, centers_2)
+    # print(f"\n📏 歐幾里得距離矩陣:\n{np.round(dist_matrix, 5)}\n")
 
-    # 自動推算距離門檻，使用中位數的兩倍
     all_distances = dist_matrix.flatten()
     distance_threshold = np.median(all_distances) * 2
 
@@ -341,15 +343,32 @@ def auto_calculate_tol_by_center_distance(
     for i, row in enumerate(dist_matrix):
         j = np.argmin(row)
         if row[j] > distance_threshold:
-            continue  # 超過距離上限就不配對
+            continue
         if j in matched_indices_2:
             continue
         matched_indices_2.add(j)
+
         box1 = np.array(positions_1[i])
         box2 = np.array(positions_2[j])
-        diffs.append(np.abs(box1 - box2).max())
+        diff = np.abs(box1 - box2)
+        max_diff = diff.max()
 
-    return round(np.max(diffs), 2) if diffs else 5.0
+        # print(f"🔗 比對: positions_1[{i}] 和 positions_2[{j}]")
+        # print(f"距離: {row[j]:.5f}")
+        # print(f"box1: {np.round(box1, 5).tolist()}")
+        # print(f"box2: {np.round(box2, 5).tolist()}")
+        # print(f"座標差異: {np.round(diff, 5).tolist()}")
+        # print(f"最大座標差異 (作為 tol 候選): {max_diff:.5f}\n")
+
+        diffs.append(max_diff)
+
+    if not diffs:
+        # print("⚠️ 無有效配對，回傳預設容忍值 5.0\n")
+        return 5.0
+
+    tol = np.ceil(np.max(diffs) * 100) / 100
+    # print(f"✅ 計算完成，回傳最大容忍差異 tol = {tol}\n")
+    return tol
 
 
 # atol 誤差值 先設定 5
