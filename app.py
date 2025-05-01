@@ -1,12 +1,12 @@
 import os
 import warnings
-from typing import List, Tuple
-
 import cv2
 import gradio as gr
 import numpy as np
 import supervision as sv
 import torch
+from typing import List, Tuple
+from scipy.spatial.distance import cdist
 
 from efficientvit.models.efficientvit.sam import EfficientViTSamPredictor
 from efficientvit.sam_model_zoo import create_sam_model
@@ -225,109 +225,131 @@ def process_image(
 ) -> tuple:
     global exclude_positions
 
-    # Resize the input image to the desired resolution
+    # Resize image
     resized_image = resize_image(input_image, image_resolution)
 
-    # Preparation.
+    # Process categories
     categories = process_categories(categories)
     YOLO_WORLD_MODEL.set_classes(categories)
 
-    # Object detection
+    # YOLO-World Detection
     results = YOLO_WORLD_MODEL.infer(resized_image, confidence=confidence_threshold)
     detections = sv.Detections.from_inference(results).with_nms(
         class_agnostic=True, threshold=nms_threshold
     )
 
-    # print(f"Original detections: {len(detections.xyxy)}")
-
+    # Apply filter condition (score ranges)
     if conditions:
         detections = filter_detections(conditions, detections)
 
-    # print(f"Filtered detections: {len(detections.xyxy)}")
-
-    # Segmentation
+    # EfficientViT-SAM Segmentation
     if with_segmentation:
         sam.set_image(resized_image, image_format="RGB")
         masks = []
         for xyxy in detections.xyxy:
             mask, _, _ = sam.predict(box=xyxy, multimask_output=False)
-            mask = mask.squeeze()  # Reduce dimensions
-            masks.append(mask)
-
+            masks.append(mask.squeeze())
         detections.mask = np.array(masks)
-        # print(f"detections.mask: {detections.mask}")
 
+    # Reverse filter with dynamic tol
     if reverse_filter and exclude_positions:
-        detections = filter_detections_by_position(detections, exclude_positions)
+        # 自動推導 tol
+        current_positions = [tuple(box) for box in detections.xyxy]
+        tol = auto_calculate_tol_by_center_distance(
+            exclude_positions, current_positions
+        )
+        # print(f"tol: {tol}")
+        detections = filter_detections_by_position(detections, exclude_positions, tol)
 
-    exclude_positions = [(box[0], box[1], box[2], box[3]) for box in detections.xyxy]
+    # 儲存目前位置供下次比較
+    exclude_positions = [tuple(box) for box in detections.xyxy]
 
-    # Combine masks into one mask image
+    # 合併 Mask
     if with_segmentation and detections.mask.size > 0:
         combined_mask = np.logical_or.reduce(detections.mask, axis=0)
-        mask_image = combined_mask.astype(np.uint8) * 255
+        mask_image = (combined_mask * 255).astype(np.uint8)
 
-        # Create RGBA images
         rgba_image = np.zeros((*resized_image.shape[:2], 4), dtype=np.uint8)
-        rgba_image[..., :3] = resized_image  # Set RGB channels
+        rgba_image[..., :3] = resized_image
+        rgba_image[..., 3] = mask_image
 
-        rgba_image[..., 3] = mask_image  # Set alpha channel from the mask
-        image_bg_removal = rgba_image
-
-        bg_image = np.zeros((*resized_image.shape[:2], 4), dtype=np.uint8)
+        bg_image = np.zeros_like(rgba_image)
         bg_image[..., :3] = resized_image
         bg_image[..., 3] = np.where(combined_mask, 0, 255)
 
         if with_dilate_kernel:
-            mask_image = dilate_mask(mask_image, dilate_kernel_size)
-            image_bg_removal[..., 3] = mask_image  # Dilate alpha channel only
-
-            binary_mask = combined_mask.astype(np.uint8)
-            dilated_mask = dilate_mask(binary_mask, dilate_kernel_size)
+            dilated_mask = dilate_mask(mask_image, dilate_kernel_size)
+            rgba_image[..., 3] = dilated_mask
             bg_image[..., 3] = np.where(dilated_mask, 0, 255)
-
     else:
-        mask_image = np.zeros(
-            resized_image.shape[:2], dtype=np.uint8
-        )  # Return an empty mask if no segmentation
-        image_bg_removal = np.zeros(
-            (*resized_image.shape[:2], 4), dtype=np.uint8
-        )  # Empty RGBA image
+        mask_image = np.zeros(resized_image.shape[:2], dtype=np.uint8)
+        rgba_image = np.zeros((*resized_image.shape[:2], 4), dtype=np.uint8)
         bg_image = resized_image.copy()
 
-    # ObjShadow Mask
+    # ObjShadow mask
     if with_objShadow:
         sam_objShadow.set_image(resized_image, image_format="RGB")
         masks = []
         for xyxy in detections.xyxy:
             mask, _, _ = sam_objShadow.predict(box=xyxy, multimask_output=False)
-            mask = mask.squeeze()  # Reduce dimensions
-            masks.append(mask)
+            masks.append(mask.squeeze())
+        obj_mask = (np.any(masks, axis=0) * 255).astype(np.uint8)
+        final_mask = cv2.bitwise_or(mask_image, obj_mask)
+        final_mask = (final_mask > 0).astype(np.uint8) * 255
+    else:
+        obj_mask = None
+        final_mask = None
 
-        # combine masks into one mask image
-        combined_mask = np.any(masks, axis=0).astype(np.uint8)
-        objShadow_mask_bw = combined_mask * 255
-
-        final_combined_mask = cv2.bitwise_or(mask_image, objShadow_mask_bw)
-        final_mask_bw = (final_combined_mask > 0).astype(np.uint8) * 255
-
-    # Annotation
+    # 標註輸出
     output_image = cv2.cvtColor(resized_image, cv2.COLOR_RGB2BGR)
-    output_image = annotate_image(
-        input_image=output_image,
-        detections=detections,
-        categories=categories,
-        with_confidence=with_confidence,
-    )
+    output_image = annotate_image(output_image, detections, categories, with_confidence)
+    output_image = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
 
     return (
-        cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB),
+        output_image,
         mask_image,
-        image_bg_removal,
+        rgba_image,
         bg_image,
-        objShadow_mask_bw if with_objShadow else None,
-        final_mask_bw if with_objShadow else None,
+        obj_mask,
+        final_mask,
     )
+
+
+def auto_calculate_tol_by_center_distance(
+    positions_1: List[Tuple[float, float, float, float]],
+    positions_2: List[Tuple[float, float, float, float]],
+) -> float:
+    if not positions_1 or not positions_2:
+        return 5.0
+
+    def get_centers(positions):
+        return np.array(
+            [[(x1 + x2) / 2, (y1 + y2) / 2] for x1, y1, x2, y2 in positions]
+        )
+
+    centers_1 = get_centers(positions_1)
+    centers_2 = get_centers(positions_2)
+    dist_matrix = cdist(centers_1, centers_2)  # 歐幾里得距離計算
+
+    # 自動推算距離門檻，使用中位數的兩倍
+    all_distances = dist_matrix.flatten()
+    distance_threshold = np.median(all_distances) * 2
+
+    matched_indices_2 = set()
+    diffs = []
+
+    for i, row in enumerate(dist_matrix):
+        j = np.argmin(row)
+        if row[j] > distance_threshold:
+            continue  # 超過距離上限就不配對
+        if j in matched_indices_2:
+            continue
+        matched_indices_2.add(j)
+        box1 = np.array(positions_1[i])
+        box2 = np.array(positions_2[j])
+        diffs.append(np.abs(box1 - box2).max())
+
+    return round(np.max(diffs), 2) if diffs else 5.0
 
 
 # atol 誤差值 先設定 5
