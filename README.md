@@ -1,4 +1,9 @@
-# YOLO-World_EfficientViT-SAM_LaMa
+# Detect-Anything
+
+1. YOLO-World
+2. EfficientViT-SAM
+3. LaMa
+4. Stable Diffusion 2 Inpainting
 
 ## Getting Started
 
@@ -12,7 +17,7 @@ Use Anaconda to create a new environment and install the required packages.
 ```
 uv venv
 
-.venv\Scripts\activate
+.venv\Scripts\activate or source .venv/bin/activate
 
 uv pip install -r pyproject.toml
 ```
@@ -59,6 +64,10 @@ it delivers 48.9× measured TensorRT speedup on A100 GPU over SAM-ViT-H without 
 [LaMa](https://github.com/advimman/lama) is an advanced image inpainting method that significantly improves the restoration of large missing areas, complex geometric structures, and high-resolution images through the use of fast Fourier convolutions and high receptive field perceptual loss.
 
 <img width="1024" src="./assets/lama_1.png">
+
+### Stable Diffusion 2 Inpainting
+
+[Stable Diffusion 2 Inpainting](https://huggingface.co/stabilityai/stable-diffusion-2-inpainting) is a diffusion-based image inpainting method that can automatically generate reasonable and high-quality content based on masked areas, widely used in object removal, content filling, and other scenarios.
 
 ## Citation
 
