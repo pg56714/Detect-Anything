@@ -22,6 +22,8 @@ uv venv
 uv pip install -r pyproject.toml
 ```
 
+PyTorch is installed from the CUDA 12.6 wheel index (`pytorch-cu126` in `pyproject.toml`), which needs an NVIDIA driver that supports CUDA 12.6 or newer.
+
 ### Weights
 
 Download the weights from the following links and save them in the `weights` directory.
