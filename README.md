@@ -71,6 +71,10 @@ it delivers 48.9× measured TensorRT speedup on A100 GPU over SAM-ViT-H without 
 
 [Stable Diffusion 2 Inpainting](https://huggingface.co/stabilityai/stable-diffusion-2-inpainting) is a diffusion-based image inpainting method that can automatically generate reasonable and high-quality content based on masked areas, widely used in object removal, content filling, and other scenarios.
 
+## Security
+
+Dependency upgrades and the known remaining issues are recorded in [docs/security-log.md](docs/security-log.md) ([繁體中文](docs/security-log.zh-TW.md)).
+
 ## Citation
 
 ```
