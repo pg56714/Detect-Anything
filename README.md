@@ -1,5 +1,7 @@
 # Detect-Anything
 
+> **Security:** see [SECURITY.md](SECURITY.md) for known dependency issues.
+
 1. YOLO-World
 2. EfficientViT-SAM
 3. LaMa
@@ -10,7 +12,7 @@
 ### Installation
 
 download the pretrained weights from the following links and save them in the `weights` directory.
-https://huggingface.co/han-cai/efficientvit-sam/resolve/main/xl1.pt
+https://huggingface.co/mit-han-lab/efficientvit-sam/resolve/main/efficientvit_sam_xl1.pt (save it as `xl1.pt`)
 
 Use Anaconda to create a new environment and install the required packages.
 
@@ -33,7 +35,7 @@ curl -LJO https://huggingface.co/smartywu/big-lama/resolve/main/big-lama.zip
 unzip big-lama.zip
 ```
 
-[EfficientViT-SAM-XL1](https://huggingface.co/han-cai/efficientvit-sam/resolve/main/xl1.pt)
+[EfficientViT-SAM-XL1](https://huggingface.co/mit-han-lab/efficientvit-sam/resolve/main/efficientvit_sam_xl1.pt) (save it as `xl1.pt`)
 
 ### Running the Project
 
@@ -70,10 +72,6 @@ it delivers 48.9× measured TensorRT speedup on A100 GPU over SAM-ViT-H without 
 ### Stable Diffusion 2 Inpainting
 
 [Stable Diffusion 2 Inpainting](https://huggingface.co/stabilityai/stable-diffusion-2-inpainting) is a diffusion-based image inpainting method that can automatically generate reasonable and high-quality content based on masked areas, widely used in object removal, content filling, and other scenarios.
-
-## Security
-
-Dependency upgrades and the known remaining issues are recorded in [docs/security-log.md](docs/security-log.md) ([繁體中文](docs/security-log.zh-TW.md)).
 
 ## Citation
 
