@@ -172,3 +172,9 @@ src
 .vscode
 
 Weights/big-lama
+
+# Local environment, weights and training outputs
+weights/*
+!weights/.gitkeep
+datasets/*
+!datasets/.gitkeep
